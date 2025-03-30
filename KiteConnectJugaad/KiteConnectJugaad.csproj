@@ -4,6 +4,15 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Version>4.3.0</Version>
+        <Title>KiteConnectJugaad</Title>
+        <Authors>Pishang Ujeniya</Authors>
+        <Description>KiteConnect SDK converted to Jugaad</Description>
+        <PackageProjectUrl>https://github.com/pishangujeniya/dotnetkiteconnect-jugaad</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/pishangujeniya/dotnetkiteconnect-jugaad#MIT-1-ov-file</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/pishangujeniya/dotnetkiteconnect-jugaad</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>KiteConnectJugaad, KiteConnect, Zerodha, Trading, API, .NET</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>

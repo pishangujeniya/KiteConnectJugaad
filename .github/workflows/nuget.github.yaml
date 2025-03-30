@@ -1,0 +1,62 @@
+name: GitHub Nuget Package
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [main]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET environment
+        uses: actions/setup-dotnet@v3.2.0
+        with:
+          dotnet-version: "8.x"
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build -c Release KiteConnect.sln
+
+      - name: Generate a NuGet package
+        run: dotnet pack KiteConnect.sln --no-build -c Release -o .
+
+      - name: Extracting the version
+        id: extracted-version
+        run: |
+          output=$(grep -oP '(?<=<Version>).*?(?=<\/Version>)' ./KiteConnectJugaad/KiteConnectJugaad.csproj)
+          echo "::set-output name=extractedVersion::$output"
+
+      - name: Push to GitHub package registry
+        run: dotnet nuget push KiteConnectJugaad.${{ steps.extracted-version.outputs.extractedVersion }}.nupkg
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.extracted-version.outputs.extractedVersion }}
+
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+
+      - name: Delete Old Package Versions
+        uses: actions/delete-package-versions@v5.0.0
+        with:
+          package-name: "KiteConnectJugaad"
+          package-type: "nuget"
+          min-versions-to-keep: 50
