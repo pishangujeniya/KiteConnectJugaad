@@ -5,6 +5,8 @@ name: GitHub Nuget Package
 on:
   push:
     branches: [main]
+    paths:
+      - "KiteConnectJugaad/**" # Trigger only if changes are in the KiteConnectJugaad folder
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
