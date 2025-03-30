@@ -58,10 +58,5 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-
-      - name: Delete Old Package Versions
-        uses: actions/delete-package-versions@v5.0.0
-        with:
-          package-name: "KiteConnectJugaad"
-          package-type: "nuget"
-          min-versions-to-keep: 50
+          artifacts: |
+            KiteConnectJugaad.${{ steps.extracted-version.outputs.extractedVersion }}.nupkg
