@@ -1,0 +1,3 @@
+[submodule "dotnetkiteconnect"]
+	path = dotnetkiteconnect
+	url = https://github.com/zerodha/dotnetkiteconnect.git
