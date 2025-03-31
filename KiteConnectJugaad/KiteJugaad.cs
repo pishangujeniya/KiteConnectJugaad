@@ -17,34 +17,36 @@ namespace KiteConnectJugaad
     public class KiteJugaad : Kite
     {
         /// <summary>
+        ///     Default constructor, which sets the browser based _root url with a concatenation patch
+        /// </summary>
+        public KiteJugaad(string? userId = null, string? encToken = null) : base(string.Empty, string.Empty, JugaadConstants.KiteBrowserApiRoot)
+        {
+            this.UserId = userId;
+            this.EncToken = encToken;
+            // this._root = JugaadConstants.KiteBrowserApiRoot;
+        }
+
+        /// <summary>
         ///     Keeps the last received enctoken cookie value.
         /// </summary>
-        private string _encToken = string.Empty;
+        public string? EncToken { get; private set; }
 
         /// 1. Original Kite class of the official library uses _root variable for API domain.
         /// 2. We needed to change _root to browser based url, which is done in constructor.
         /// 3. We also need to concatenate a patch to the _root url, which is done in constructor.
         /// 4. We need to replace the headers with browser based headers which is overriden in AddExtraHeaders method.
         /// 5. We need to first login and then two-factor authentication.
-        /// 6. On success of both we need to read the cookie value of enctoken name and then after every request should have that token in the Authorization header.
+        /// 6. On success of both we need to read the cookie value of EncToken name and then after every request should have that token in the Authorization header.
         /// 7. The _request method is overriden with one logic where the every response of it should update the value of _encToken with the last received response value.
         /// <summary>
         ///     Stores the User ID.
         /// </summary>
-        private string _userId = string.Empty;
-
-        /// <summary>
-        ///     Default constructor, which sets the browser based _root url with a concatenation patch
-        /// </summary>
-        public KiteJugaad() : base(string.Empty)
-        {
-            this._root = JugaadConstants.KiteBrowserApiRoot;
-        }
+        public string? UserId { get; private set; }
 
         /// <summary>
         ///     A simpler way to detect the session is active or not.
         /// </summary>
-        public bool IsAuthorized => !string.IsNullOrWhiteSpace(this._userId) && !string.IsNullOrWhiteSpace(this._encToken);
+        public bool IsAuthorized => !string.IsNullOrWhiteSpace(this.UserId) && !string.IsNullOrWhiteSpace(this.EncToken);
 
         /// <summary>
         ///     Fully functional password based login flow including two factor authentication.
@@ -56,7 +58,7 @@ namespace KiteConnectJugaad
         /// <exception cref="TokenException"></exception>
         public async Task<bool> Login(string userId, string password, string appCode)
         {
-            this._userId = userId;
+            this.UserId = userId;
 
             string loginUrl = "https://kite.zerodha.com/api/login";
 
@@ -134,7 +136,7 @@ namespace KiteConnectJugaad
                 string? encTokenCookie = cookieValues.FirstOrDefault(x => x.StartsWith("enctoken="));
                 if (!string.IsNullOrWhiteSpace(encTokenCookie))
                 {
-                    this._encToken = encTokenCookie.Split(';')[0].Substring("enctoken=".Length);
+                    this.EncToken = encTokenCookie.Split(';')[0].Substring("enctoken=".Length);
                 }
             }
         }
@@ -169,15 +171,15 @@ namespace KiteConnectJugaad
             Req.Headers.Referrer = new Uri("https://kite.zerodha.com/dashboard");
 
             // Add user ID if available
-            if (!string.IsNullOrWhiteSpace(this._userId))
+            if (!string.IsNullOrWhiteSpace(this.UserId))
             {
-                Req.Headers.TryAddWithoutValidation("x-kite-userid", this._userId);
+                Req.Headers.TryAddWithoutValidation("x-kite-userid", this.UserId);
             }
 
             // Add authorization token if available (replaces if exists)
-            if (!string.IsNullOrWhiteSpace(this._encToken))
+            if (!string.IsNullOrWhiteSpace(this.EncToken))
             {
-                Req.Headers.Authorization = new AuthenticationHeaderValue("enctoken", this._encToken);
+                Req.Headers.Authorization = new AuthenticationHeaderValue("enctoken", this.EncToken);
             }
         }
 
