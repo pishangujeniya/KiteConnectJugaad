@@ -54,8 +54,8 @@ namespace KiteConnectJugaad
         /// <param name="userId"></param>
         /// <param name="password"></param>
         /// <param name="appCode"></param>
-        /// <exception cref="GeneralException"></exception>
-        /// <exception cref="TokenException"></exception>
+        /// <exception cref="KiteConnect.GeneralException"></exception>
+        /// <exception cref="KiteConnect.TokenException"></exception>
         public async Task<bool> Login(string userId, string password, string appCode)
         {
             this.UserId = userId;
@@ -72,8 +72,7 @@ namespace KiteConnectJugaad
             this.AddExtraHeaders(ref loginRequest);
 
             // Send request
-            using HttpClient httpClient = new();
-            using HttpResponseMessage loginResponse = await httpClient.SendAsync(loginRequest);
+            using HttpResponseMessage loginResponse = await this.httpClient.SendAsync(loginRequest);
 
             // Read response
             string loginResponseContent = await loginResponse.Content.ReadAsStringAsync();
@@ -107,7 +106,7 @@ namespace KiteConnectJugaad
                 this.AddExtraHeaders(ref twoFaRequest);
 
                 // Send request
-                using HttpResponseMessage twoFaResponse = await httpClient.SendAsync(twoFaRequest);
+                using HttpResponseMessage twoFaResponse = await this.httpClient.SendAsync(twoFaRequest);
 
                 // Read response
                 string responseContent = await twoFaResponse.Content.ReadAsStringAsync();
@@ -193,13 +192,13 @@ namespace KiteConnectJugaad
         /// <param name="QueryParams"></param>
         /// <param name="json"></param>
         /// <returns></returns>
-        /// <exception cref="GeneralException"></exception>
-        /// <exception cref="TokenException"></exception>
-        /// <exception cref="PermissionException"></exception>
-        /// <exception cref="OrderException"></exception>
-        /// <exception cref="InputException"></exception>
+        /// <exception cref="KiteConnect.GeneralException"></exception>
+        /// <exception cref="KiteConnect.TokenException"></exception>
+        /// <exception cref="KiteConnect.PermissionException"></exception>
+        /// <exception cref="KiteConnect.OrderException"></exception>
+        /// <exception cref="KiteConnect.InputException"></exception>
         /// <exception cref="KiteConnect.DataException"></exception>
-        /// <exception cref="NetworkException"></exception>
+        /// <exception cref="KiteConnect.NetworkException"></exception>
         public override async Task<object> Request(string Route, string Method, dynamic Params = null, Dictionary<string, dynamic> QueryParams = null, bool json = false)
         {
             string route = this._root + this._routes[Route];
@@ -228,7 +227,6 @@ namespace KiteConnectJugaad
                 }
             }
 
-            using HttpClient httpClient = new();
             HttpRequestMessage request;
             HttpResponseMessage response;
 
@@ -293,7 +291,7 @@ namespace KiteConnectJugaad
 
             try
             {
-                response = await httpClient.SendAsync(request);
+                response = await this.httpClient.SendAsync(request);
                 this.SetEncTokenIfReceived(response);
             }
             catch (HttpRequestException e)
@@ -358,10 +356,9 @@ namespace KiteConnectJugaad
         ///     Provides the Instruments CSV file into DataTable
         /// </summary>
         /// <returns></returns>
-        public static async Task<DataTable> GetInstrumentsCsv()
+        public async Task<DataTable> GetInstrumentsCsv()
         {
-            using HttpClient httpClient = new();
-            Stream stream = await httpClient.GetStreamAsync(JugaadConstants.KiteInstrumentsCsvUrl);
+            Stream stream = await this.httpClient.GetStreamAsync(JugaadConstants.KiteInstrumentsCsvUrl);
             using StreamReader reader = new(stream);
             using CsvReader csv = new(reader, CultureInfo.InvariantCulture);
             using CsvDataReader dr = new(csv);
